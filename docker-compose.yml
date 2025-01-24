@@ -1,0 +1,35 @@
+services:
+  php:
+    build: 
+      context: './php/'
+      args:
+       PHP_VERSION: ${PHP_VERSION}
+    ports:
+      - "8000:8000"
+      - "5173:5173"
+    networks:
+      - laravel
+    volumes:
+      - ${PROJECT_ROOT}/:/var/www/html/
+    depends_on:
+      - postgres
+    command: sh -c "composer install && composer run dev && php-fpm"
+    container_name: php
+  postgres:
+    image: postgres:${POSTGRES_VERSION:-latest}
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+    networks:
+      - laravel
+    environment:
+      POSTGRES_PASSWORD: "${DB_ROOT_PASSWORD}"
+      POSTGRES_DB: "${DB_NAME}"
+      POSTGRES_USER: "${DB_USERNAME}"
+    container_name: postgres
+networks:
+  laravel:
+volumes:
+    data:
